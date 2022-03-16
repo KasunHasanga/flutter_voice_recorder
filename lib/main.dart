@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:voice_recorder/api/sound_recorder.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(),
+      home: const HomePage(),
     );
   }
 }
@@ -28,11 +29,29 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+  final recorder=SoundRecorder();
+
+  @override
+  void initState() {
+
+    super.initState();
+    recorder.init();
+  }
+
+  @override
+  void dispose() {
+    recorder.dispose();
+    super.dispose();
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Audio Recorder"),
+        title: const Text("Audio Recorder"),
         centerTitle: true,
         elevation: 0,
       ),
@@ -44,23 +63,32 @@ class _HomePageState extends State<HomePage> {
 
   Widget buildStart() {
 
-    final isRecording =true;
+    final isRecording =recorder.isRecording;
     final icon =isRecording ?Icons.stop :Icons.mic;
     final text =isRecording ? 'STOP': 'START';
     final primary =isRecording? Colors.red :Colors.white;
     final onPrimary =isRecording ?Colors.white:Colors.black;
     return ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-            minimumSize: Size(175, 50),
+            minimumSize: const Size(175, 50),
             primary: primary,
             onPrimary: onPrimary),
-        onPressed: ()  {
+        onPressed: ()  async{
+          // bool isPermissionOk=await recorder.checkMicrophonePermission();
+          // if (isPermissionOk){
+            await recorder.toggleRecording();
+            setState(() {
+
+            });
+          // }else{
+          //   print("Something went Wrong");
+          // }
 
         },
         icon: Icon(icon),
         label: Text(
           text,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ));
   }
 }
