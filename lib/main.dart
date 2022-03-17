@@ -1,5 +1,7 @@
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:voice_recorder/api/sound_recorder.dart';
+import 'package:voice_recorder/widget/timer_widget.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,7 +31,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
+  final timerController =TimerController();
   final recorder=SoundRecorder();
 
   @override
@@ -50,13 +52,46 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text("Audio Recorder"),
         centerTitle: true,
         elevation: 0,
       ),
       body: Center(
-        child: buildStart(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+
+            AvatarGlow(
+              glowColor: Colors.white,
+              endRadius: 140.0,
+              duration: Duration(milliseconds: 200),
+              animate: recorder.isRecording?true:false,
+              repeatPauseDuration: Duration(milliseconds: 100),
+              child: CircleAvatar(
+                radius: 100,
+                backgroundColor: Colors.white,
+                child: CircleAvatar(
+                  backgroundColor: Colors.indigo.shade900.withBlue(70),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.mic),
+                      TimerWidget(controller: timerController,),
+                        SizedBox(height: 8,),
+
+                    ],
+                  ),
+                  radius: 92.0,
+                ),
+              ),
+            ),
+
+            buildStart(),
+          ],
+        ),
       ),
     );
   }
@@ -77,8 +112,13 @@ class _HomePageState extends State<HomePage> {
           // bool isPermissionOk=await recorder.checkMicrophonePermission();
           // if (isPermissionOk){
             await recorder.toggleRecording();
+            final isRecording =recorder.isRecording;
             setState(() {
-
+              if(isRecording){
+                timerController.startTimer();
+              }else{
+                timerController.stopTimer();
+              }
             });
           // }else{
           //   print("Something went Wrong");
