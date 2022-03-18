@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const HomePage(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -44,16 +45,16 @@ class _HomePageState extends State<HomePage> {
   void initState() {
 
     super.initState();
-    recorder.init();
     getApplicationDocumentsDirectory().then((value) {
       appDirectory = value;
       appDirectory.list().listen((onData) {
-        if (onData.path.contains('.amr')) records.add(onData.path);
+        if (onData.path.contains('.aac')) records.add(onData.path);
       }).onDone(() {
         records = records.reversed.toList();
         setState(() {});
       });
     });
+    recorder.init();
   }
 
   @override
@@ -74,15 +75,12 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
         elevation: 0,
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            RecordListView(
-              records: records,
-            ),
-            ElevatedButton(onPressed: _onRecordComplete , child: Text("Text")),
+
             AvatarGlow(
               glowColor: Colors.white,
               endRadius: 140.0,
@@ -109,6 +107,10 @@ class _HomePageState extends State<HomePage> {
             ),
 
             buildStart(),
+            SizedBox(height: 20,),
+            RecordListView(
+              records: records,
+            ),
           ],
         ),
       ),
@@ -146,6 +148,7 @@ class _HomePageState extends State<HomePage> {
                 timerController.startTimer();
               }else{
                 timerController.stopTimer();
+                _onRecordComplete();
               }
             });
           // }else{

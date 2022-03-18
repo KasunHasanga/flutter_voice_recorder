@@ -1,5 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 class RecordListView extends StatefulWidget {
   final List<String> records;
@@ -41,7 +42,7 @@ class _RecordListViewState extends State<RecordListView> {
           }),
           children: [
             Container(
-              height: 100,
+              height: 125,
               padding: const EdgeInsets.all(10),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -61,6 +62,13 @@ class _RecordListViewState extends State<RecordListView> {
                         : Icon(Icons.play_arrow),
                     onPressed: () => _onPlay(
                         filePath: widget.records.elementAt(i), index: i),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.share),
+                    onPressed: () {
+                      print(widget.records.elementAt(i));
+                      Share.shareFiles([widget.records.elementAt(i)], text: _getNameFromFilePath(filePath:widget.records.elementAt(i)));
+                    }
                   ),
                 ],
               ),
@@ -115,5 +123,20 @@ class _RecordListViewState extends State<RecordListView> {
     int day = recordedDate.day;
 
     return ('$year-$month-$day');
+  }
+  String _getNameFromFilePath({required String filePath}) {
+    String fromEpoch = filePath.substring(
+        filePath.lastIndexOf('/') + 1, filePath.lastIndexOf('.'));
+
+    DateTime recordedDate =
+    DateTime.fromMillisecondsSinceEpoch(int.parse(fromEpoch));
+    int year = recordedDate.year;
+    int month = recordedDate.month;
+    int day = recordedDate.day;
+    int hour = recordedDate.hour;
+    int minute = recordedDate.minute;
+    int second =recordedDate.second;
+
+    return ('Recording $year:$month:$day-$hour:$minute:$second');
   }
 }
