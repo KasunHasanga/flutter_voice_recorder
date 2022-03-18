@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
@@ -63,12 +65,25 @@ class _RecordListViewState extends State<RecordListView> {
                     onPressed: () => _onPlay(
                         filePath: widget.records.elementAt(i), index: i),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.share),
-                    onPressed: () {
-                      print(widget.records.elementAt(i));
-                      Share.shareFiles([widget.records.elementAt(i)], text: _getNameFromFilePath(filePath:widget.records.elementAt(i)));
-                    }
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.share),
+                        onPressed: () {
+                          print(widget.records.elementAt(i));
+                          Share.shareFiles([widget.records.elementAt(i)], text: _getNameFromFilePath(filePath:widget.records.elementAt(i)));
+                        }
+                      ),
+                      IconButton(
+                          icon: Icon(Icons.delete_forever),
+                          onPressed: () async{
+                            final dir =Directory(widget.records.elementAt(i));
+                            await dir.delete(recursive: true);
+
+                          }
+                      ),
+                    ],
                   ),
                 ],
               ),
