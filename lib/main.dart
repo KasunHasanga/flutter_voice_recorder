@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:voice_recorder/api/sound_recorder.dart';
+import 'package:voice_recorder/widget/recorder_list_view.dart';
 import 'package:voice_recorder/widget/timer_widget.dart';
 
 void main() {
@@ -33,17 +37,29 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final timerController =TimerController();
   final recorder=SoundRecorder();
+  late Directory appDirectory;
+  List<String> records = [];
 
   @override
   void initState() {
 
     super.initState();
     recorder.init();
+    getApplicationDocumentsDirectory().then((value) {
+      appDirectory = value;
+      appDirectory.list().listen((onData) {
+        if (onData.path.contains('.amr')) records.add(onData.path);
+      }).onDone(() {
+        records = records.reversed.toList();
+        setState(() {});
+      });
+    });
   }
 
   @override
   void dispose() {
     recorder.dispose();
+    appDirectory.delete();
     super.dispose();
   }
 
@@ -52,7 +68,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.yellow,
       appBar: AppBar(
         title: const Text("Audio Recorder"),
         centerTitle: true,
@@ -63,7 +79,10 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-
+            RecordListView(
+              records: records,
+            ),
+            ElevatedButton(onPressed: _onRecordComplete , child: Text("Text")),
             AvatarGlow(
               glowColor: Colors.white,
               endRadius: 140.0,
@@ -95,7 +114,16 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
+  _onRecordComplete() {
+    records.clear();
+    appDirectory.list().listen((onData) {
+      if (onData.path.contains('.aac')) records.add(onData.path);
+    }).onDone(() {
+      records.sort();
+      records = records.reversed.toList();
+      setState(() {});
+    });
+  }
   Widget buildStart() {
 
     final isRecording =recorder.isRecording;

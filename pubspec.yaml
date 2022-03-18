@@ -38,6 +38,7 @@ dependencies:
   permission_handler: ^9.2.0
   path_provider: ^2.0.9
   avatar_glow: ^2.0.2
+  audioplayers: ^0.20.1
 
 dev_dependencies:
   flutter_test:

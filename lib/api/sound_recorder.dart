@@ -1,9 +1,13 @@
 
 
+import 'dart:io';
+
+
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-const pathToSaveAudio='audio_example.amr';
+
 
 class SoundRecorder {
   FlutterSoundRecorder? _audioRecorder;
@@ -27,6 +31,10 @@ class SoundRecorder {
   Future checkMicrophonePermission() async{
     final status =await Permission.microphone.request();
     if(status!=PermissionStatus.granted){
+      // ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      //   content: Text('Please allow recording from settings.'),
+      // ));
      return false;
     }else{
       return true;
@@ -43,7 +51,12 @@ Future dispose() async{
 
   Future _record() async {
     if(!_isRecorderInitilized) return;
-    await _audioRecorder!.startRecorder(toFile:pathToSaveAudio,codec: Codec.amrWB );
+    Directory appDirectory = await getApplicationDocumentsDirectory();
+    String filePath = await appDirectory.path +
+        '/' +
+        DateTime.now().millisecondsSinceEpoch.toString() +
+        '.aac';
+    await _audioRecorder!.startRecorder(toFile:filePath,codec: Codec.aacMP4);
 
   }
 
