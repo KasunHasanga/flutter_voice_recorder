@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Audio Recorder',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -75,44 +75,27 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-
-            AvatarGlow(
-              glowColor: Colors.white,
-              endRadius: 140.0,
-              duration: Duration(milliseconds: 200),
-              animate: recorder.isRecording?true:false,
-              repeatPauseDuration: Duration(milliseconds: 100),
-              child: CircleAvatar(
-                radius: 100,
-                backgroundColor: Colors.white,
-                child: CircleAvatar(
-                  backgroundColor: Colors.indigo.shade900.withBlue(70),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.mic),
-                      TimerWidget(controller: timerController,),
-                        SizedBox(height: 8,),
-
-                    ],
-                  ),
-                  radius: 92.0,
-                ),
-              ),
-            ),
-
-            buildStart(),
-            SizedBox(height: 20,),
-            RecordListView(
+      body: Column(
+        // crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            flex: 1,
+            child: RecordListView(
               records: records,
             ),
-          ],
-        ),
+          ),
+          SizedBox(
+            height: 280,
+            child: Column(
+              children: [
+                recodingWidget(),
+                // buildStart(),
+              ],
+            ),
+          ),
+
+        ],
       ),
     );
   }
@@ -126,21 +109,25 @@ class _HomePageState extends State<HomePage> {
       setState(() {});
     });
   }
-  Widget buildStart() {
-
+  Widget recodingWidget(){
     final isRecording =recorder.isRecording;
     final icon =isRecording ?Icons.stop :Icons.mic;
     final text =isRecording ? 'STOP': 'START';
     final primary =isRecording? Colors.red :Colors.white;
     final onPrimary =isRecording ?Colors.white:Colors.black;
-    return ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(
-            minimumSize: const Size(175, 50),
-            primary: primary,
-            onPrimary: onPrimary),
-        onPressed: ()  async{
-          // bool isPermissionOk=await recorder.checkMicrophonePermission();
-          // if (isPermissionOk){
+    return AvatarGlow(
+      glowColor: Colors.white,
+      endRadius: 140.0,
+      duration: Duration(milliseconds: 200),
+      animate: recorder.isRecording?true:false,
+      repeatPauseDuration: Duration(milliseconds: 100),
+      child: CircleAvatar(
+        radius: 100,
+        backgroundColor: Colors.white,
+        child: GestureDetector(
+          onTap: ()  async{
+            // bool isPermissionOk=await recorder.checkMicrophonePermission();
+            // if (isPermissionOk){
             await recorder.toggleRecording();
             final isRecording =recorder.isRecording;
             setState(() {
@@ -151,15 +138,26 @@ class _HomePageState extends State<HomePage> {
                 _onRecordComplete();
               }
             });
-          // }else{
-          //   print("Something went Wrong");
-          // }
+            // }else{
+            //   print("Something went Wrong");
+            // }
 
-        },
-        icon: Icon(icon),
-        label: Text(
-          text,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ));
+          },
+          child: CircleAvatar(
+            backgroundColor: Colors.indigo.shade900.withBlue(70),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon),
+                TimerWidget(controller: timerController,),
+                SizedBox(height: 8,),
+
+              ],
+            ),
+            radius: 92.0,
+          ),
+        ),
+      ),
+    );
   }
 }

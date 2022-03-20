@@ -31,83 +31,14 @@ class _RecordListViewState extends State<RecordListView> {
           child: ListTile(
             title:Text('New recoding ${widget.records.length - i}'),
             subtitle: Text(_getDateFromFilePatah(filePath: widget.records.elementAt(i))),
-            // trailing:     Row(
-            //
-            //   children: [
-            //     IconButton(
-            //         icon: Icon(Icons.share),
-            //         onPressed: () {
-            //           print(widget.records.elementAt(i));
-            //           Share.shareFiles([widget.records.elementAt(i)], text: _getNameFromFilePath(filePath:widget.records.elementAt(i)));
-            //         }
-            //     ),
-            //     // IconButton(
-            //     //     icon: Icon(Icons.delete_forever),
-            //     //     onPressed: () async{
-            //     //       final dir =Directory(widget.records.elementAt(i));
-            //     //       await dir.delete(recursive: true);
-            //     //
-            //     //     }
-            //     // ),
-            //     IconButton(
-            //         icon: Icon(Icons.cancel),
-            //         onPressed: () {
-            //           Navigator.push(
-            //             context,
-            //             MaterialPageRoute(builder: (context) =>  SingleRecordingView(record:widget.records.elementAt(i) ,)),
-            //           );
-            //
-            //         }
-            //     ),
-            //   ],
-            // ),
 
           ),
-          startActionPane: ActionPane(
-            // A motion is a widget used to control how the pane animates.
-            motion: const ScrollMotion(),
-
-            // A pane can dismiss the Slidable.
-            dismissible: DismissiblePane(onDismissed: () {}),
-
-            // All actions are defined in the children parameter.
-            children:  [
-              IconButton(
-                  icon: Icon(Icons.share),
-                  onPressed: () {
-                    print(widget.records.elementAt(i));
-                    Share.shareFiles([widget.records.elementAt(i)], text: _getNameFromFilePath(filePath:widget.records.elementAt(i)));
-                  }
-              ),
-              IconButton(
-                  icon: Icon(Icons.delete_forever),
-                  onPressed: () async{
-                    final dir =Directory(widget.records.elementAt(i));
-                    await dir.delete(recursive: true);
-
-                  }
-              ),
-              IconButton(
-                  icon: Icon(Icons.cancel),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) =>  SingleRecordingView(record:widget.records.elementAt(i) ,)),
-                    );
-
-                  }
-              ),
-            ],
-          ),
-
-          // The end action pane is the one at the right or the bottom side.
           endActionPane:  ActionPane(
             motion: ScrollMotion(),
             children: [
               IconButton(
                   icon: Icon(Icons.share),
                   onPressed: () {
-                    print(widget.records.elementAt(i));
                     Share.shareFiles([widget.records.elementAt(i)], text: _getNameFromFilePath(filePath:widget.records.elementAt(i)));
                   }
               ),
@@ -120,11 +51,11 @@ class _RecordListViewState extends State<RecordListView> {
                   }
               ),
               IconButton(
-                  icon: Icon(Icons.cancel),
+                  icon: Icon(Icons.play_circle_fill),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) =>  SingleRecordingView(record:widget.records.elementAt(i) ,)),
+                      MaterialPageRoute(builder: (context) =>  SingleRecordingView(record:widget.records.elementAt(i) ,recoderName:'New recoding ${widget.records.length - i}')),
                     );
 
                   }

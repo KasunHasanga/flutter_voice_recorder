@@ -1,14 +1,14 @@
 import 'common.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 
 
 class SingleRecordingView extends StatefulWidget {
   final String record;
-  const SingleRecordingView({ Key? key,
+  final String recoderName;
+  const SingleRecordingView({ Key? key,required this.recoderName,
     required this.record}): super(key: key);
   @override
   _SingleRecordingViewState createState() => _SingleRecordingViewState();
@@ -61,7 +61,7 @@ class _SingleRecordingViewState extends State<SingleRecordingView> with WidgetsB
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.record),
+        title: Text(widget.recoderName),
       ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
