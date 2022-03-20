@@ -1,8 +1,9 @@
 import 'dart:io';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:voice_recorder/widget/recorderSingleView.dart';
 
 class RecordListView extends StatefulWidget {
   final List<String> records;
@@ -16,12 +17,6 @@ class RecordListView extends StatefulWidget {
 }
 
 class _RecordListViewState extends State<RecordListView> {
-  late int _totalDuration;
-  late int _currentDuration;
-  double _completedPercentage = 0.0;
-  bool _isPlaying = false;
-  int _selectedIndex = -1;
-
   @override
   Widget build(BuildContext context) {
     return widget.records.isEmpty
@@ -31,101 +26,119 @@ class _RecordListViewState extends State<RecordListView> {
       shrinkWrap: true,
       reverse: true,
       itemBuilder: (BuildContext context, int i) {
-        return ExpansionTile(
-          title: Text('New recoding ${widget.records.length - i}'),
-          subtitle: Text(_getDateFromFilePatah(
-              filePath: widget.records.elementAt(i))),
-          onExpansionChanged: ((newState) {
-            if (newState) {
-              setState(() {
-                _selectedIndex = i;
-              });
-            }
-          }),
-          children: [
-            Container(
-              height: 125,
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  LinearProgressIndicator(
-                    minHeight: 5,
-                    backgroundColor: Colors.black,
-                    valueColor:
-                    AlwaysStoppedAnimation<Color>(Colors.green),
-                    value: _selectedIndex == i ? _completedPercentage : 0,
-                  ),
-                  IconButton(
-                    icon: _selectedIndex == i
-                        ? _isPlaying
-                        ? Icon(Icons.pause)
-                        : Icon(Icons.play_arrow)
-                        : Icon(Icons.play_arrow),
-                    onPressed: () => _onPlay(
-                        filePath: widget.records.elementAt(i), index: i),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.share),
-                        onPressed: () {
-                          print(widget.records.elementAt(i));
-                          Share.shareFiles([widget.records.elementAt(i)], text: _getNameFromFilePath(filePath:widget.records.elementAt(i)));
-                        }
-                      ),
-                      IconButton(
-                          icon: Icon(Icons.delete_forever),
-                          onPressed: () async{
-                            final dir =Directory(widget.records.elementAt(i));
-                            await dir.delete(recursive: true);
+        return Slidable(
+          key: ValueKey(i),
+          child: ListTile(
+            title:Text('New recoding ${widget.records.length - i}'),
+            subtitle: Text(_getDateFromFilePatah(filePath: widget.records.elementAt(i))),
+            // trailing:     Row(
+            //
+            //   children: [
+            //     IconButton(
+            //         icon: Icon(Icons.share),
+            //         onPressed: () {
+            //           print(widget.records.elementAt(i));
+            //           Share.shareFiles([widget.records.elementAt(i)], text: _getNameFromFilePath(filePath:widget.records.elementAt(i)));
+            //         }
+            //     ),
+            //     // IconButton(
+            //     //     icon: Icon(Icons.delete_forever),
+            //     //     onPressed: () async{
+            //     //       final dir =Directory(widget.records.elementAt(i));
+            //     //       await dir.delete(recursive: true);
+            //     //
+            //     //     }
+            //     // ),
+            //     IconButton(
+            //         icon: Icon(Icons.cancel),
+            //         onPressed: () {
+            //           Navigator.push(
+            //             context,
+            //             MaterialPageRoute(builder: (context) =>  SingleRecordingView(record:widget.records.elementAt(i) ,)),
+            //           );
+            //
+            //         }
+            //     ),
+            //   ],
+            // ),
 
-                          }
-                      ),
-                    ],
-                  ),
-                ],
+          ),
+          startActionPane: ActionPane(
+            // A motion is a widget used to control how the pane animates.
+            motion: const ScrollMotion(),
+
+            // A pane can dismiss the Slidable.
+            dismissible: DismissiblePane(onDismissed: () {}),
+
+            // All actions are defined in the children parameter.
+            children:  [
+              IconButton(
+                  icon: Icon(Icons.share),
+                  onPressed: () {
+                    print(widget.records.elementAt(i));
+                    Share.shareFiles([widget.records.elementAt(i)], text: _getNameFromFilePath(filePath:widget.records.elementAt(i)));
+                  }
               ),
-            ),
-          ],
+              IconButton(
+                  icon: Icon(Icons.delete_forever),
+                  onPressed: () async{
+                    final dir =Directory(widget.records.elementAt(i));
+                    await dir.delete(recursive: true);
+
+                  }
+              ),
+              IconButton(
+                  icon: Icon(Icons.cancel),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) =>  SingleRecordingView(record:widget.records.elementAt(i) ,)),
+                    );
+
+                  }
+              ),
+            ],
+          ),
+
+          // The end action pane is the one at the right or the bottom side.
+          endActionPane:  ActionPane(
+            motion: ScrollMotion(),
+            children: [
+              IconButton(
+                  icon: Icon(Icons.share),
+                  onPressed: () {
+                    print(widget.records.elementAt(i));
+                    Share.shareFiles([widget.records.elementAt(i)], text: _getNameFromFilePath(filePath:widget.records.elementAt(i)));
+                  }
+              ),
+              IconButton(
+                  icon: Icon(Icons.delete_forever),
+                  onPressed: () async{
+                    final dir =Directory(widget.records.elementAt(i));
+                    await dir.delete(recursive: true);
+
+                  }
+              ),
+              IconButton(
+                  icon: Icon(Icons.cancel),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) =>  SingleRecordingView(record:widget.records.elementAt(i) ,)),
+                    );
+
+                  }
+              ),
+            ],
+          ),
         );
+
+
+
       },
     );
   }
 
-  Future<void> _onPlay({required String filePath, required int index}) async {
-    AudioPlayer audioPlayer = AudioPlayer();
-
-    if (!_isPlaying) {
-      audioPlayer.play(filePath, isLocal: true);
-      setState(() {
-        _selectedIndex = index;
-        _completedPercentage = 0.0;
-        _isPlaying = true;
-      });
-
-      audioPlayer.onPlayerCompletion.listen((_) {
-        setState(() {
-          _isPlaying = false;
-          _completedPercentage = 0.0;
-        });
-      });
-      audioPlayer.onDurationChanged.listen((duration) {
-        setState(() {
-          _totalDuration = duration.inMicroseconds;
-        });
-      });
-
-      audioPlayer.onAudioPositionChanged.listen((duration) {
-        setState(() {
-          _currentDuration = duration.inMicroseconds;
-          _completedPercentage =
-              _currentDuration.toDouble() / _totalDuration.toDouble();
-        });
-      });
-    }
-  }
 
   String _getDateFromFilePatah({required String filePath}) {
     String fromEpoch = filePath.substring(
@@ -134,8 +147,8 @@ class _RecordListViewState extends State<RecordListView> {
     DateTime recordedDate =
     DateTime.fromMillisecondsSinceEpoch(int.parse(fromEpoch));
     int year = recordedDate.year;
-    int month = recordedDate.month;
-    int day = recordedDate.day;
+    String month =recordedDate.month.toString().length==1?'0${recordedDate.month}': recordedDate.month.toString();
+    String day =recordedDate.day.toString().length==1?'0${recordedDate.day}': recordedDate.day.toString();
 
     return ('$year-$month-$day');
   }
