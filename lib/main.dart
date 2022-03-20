@@ -36,14 +36,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final timerController =TimerController();
-  final recorder=SoundRecorder();
+  final timerController = TimerController();
+  final recorder = SoundRecorder();
   late Directory appDirectory;
   List<String> records = [];
 
   @override
   void initState() {
-
     super.initState();
     getApplicationDocumentsDirectory().then((value) {
       appDirectory = value;
@@ -63,8 +62,6 @@ class _HomePageState extends State<HomePage> {
     appDirectory.delete();
     super.dispose();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -94,11 +91,11 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-
         ],
       ),
     );
   }
+
   _onRecordComplete() {
     records.clear();
     appDirectory.list().listen((onData) {
@@ -109,31 +106,29 @@ class _HomePageState extends State<HomePage> {
       setState(() {});
     });
   }
-  Widget recodingWidget(){
-    final isRecording =recorder.isRecording;
-    final icon =isRecording ?Icons.stop :Icons.mic;
-    final text =isRecording ? 'STOP': 'START';
-    final primary =isRecording? Colors.red :Colors.white;
-    final onPrimary =isRecording ?Colors.white:Colors.black;
+
+  Widget recodingWidget() {
+    final isRecording = recorder.isRecording;
+    final icon = isRecording ? Icons.stop : Icons.mic;
     return AvatarGlow(
       glowColor: Colors.white,
       endRadius: 140.0,
       duration: Duration(milliseconds: 200),
-      animate: recorder.isRecording?true:false,
+      animate: recorder.isRecording ? true : false,
       repeatPauseDuration: Duration(milliseconds: 100),
       child: CircleAvatar(
         radius: 100,
         backgroundColor: Colors.white,
         child: GestureDetector(
-          onTap: ()  async{
+          onTap: () async {
             // bool isPermissionOk=await recorder.checkMicrophonePermission();
             // if (isPermissionOk){
             await recorder.toggleRecording();
-            final isRecording =recorder.isRecording;
+            final isRecording = recorder.isRecording;
             setState(() {
-              if(isRecording){
+              if (isRecording) {
                 timerController.startTimer();
-              }else{
+              } else {
                 timerController.stopTimer();
                 _onRecordComplete();
               }
@@ -141,7 +136,6 @@ class _HomePageState extends State<HomePage> {
             // }else{
             //   print("Something went Wrong");
             // }
-
           },
           child: CircleAvatar(
             backgroundColor: Colors.indigo.shade900.withBlue(70),
@@ -149,9 +143,12 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(icon),
-                TimerWidget(controller: timerController,),
-                SizedBox(height: 8,),
-
+                TimerWidget(
+                  controller: timerController,
+                ),
+                SizedBox(
+                  height: 8,
+                ),
               ],
             ),
             radius: 92.0,

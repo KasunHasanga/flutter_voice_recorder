@@ -40,7 +40,6 @@ dependencies:
   avatar_glow: ^2.0.2
   share_plus: ^4.0.1
   just_audio: ^0.9.20
-  flutter_slidable: ^1.2.0
 
 dev_dependencies:
   flutter_test:

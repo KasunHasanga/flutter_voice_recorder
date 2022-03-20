@@ -1,21 +1,27 @@
+import 'dart:io';
+
+import 'package:share_plus/share_plus.dart';
+import 'package:voice_recorder/main.dart';
+
 import 'common.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 
-
 class SingleRecordingView extends StatefulWidget {
   final String record;
   final String recoderName;
-  const SingleRecordingView({ Key? key,required this.recoderName,
-    required this.record}): super(key: key);
+  const SingleRecordingView(
+      {Key? key, required this.recoderName, required this.record})
+      : super(key: key);
   @override
   _SingleRecordingViewState createState() => _SingleRecordingViewState();
 }
 
-class _SingleRecordingViewState extends State<SingleRecordingView> with WidgetsBindingObserver {
-  late final AudioPlayer _player = AudioPlayer( );
+class _SingleRecordingViewState extends State<SingleRecordingView>
+    with WidgetsBindingObserver {
+  late final AudioPlayer _player = AudioPlayer();
 
   @override
   void initState() {
@@ -29,7 +35,6 @@ class _SingleRecordingViewState extends State<SingleRecordingView> with WidgetsB
     await session.configure(AudioSessionConfiguration.speech());
     try {
       await _player.setFilePath(widget.record);
-
     } catch (e) {
       print("Error loading audio source: $e");
     }
@@ -48,14 +53,14 @@ class _SingleRecordingViewState extends State<SingleRecordingView> with WidgetsB
       _player.stop();
     }
   }
+
   Stream<PositionData> get _positionDataStream =>
       Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
           _player.positionStream,
           _player.bufferedPositionStream,
           _player.durationStream,
-              (position, bufferedPosition, duration) => PositionData(
+          (position, bufferedPosition, duration) => PositionData(
               position, bufferedPosition, duration ?? Duration.zero));
-
 
   @override
   Widget build(BuildContext context) {
@@ -63,34 +68,67 @@ class _SingleRecordingViewState extends State<SingleRecordingView> with WidgetsB
       appBar: AppBar(
         title: Text(widget.recoderName),
       ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-
-
-
-            ControlButtons(_player),
-            StreamBuilder<PositionData>(
-              stream: _positionDataStream,
-              builder: (context, snapshot) {
-                final positionData = snapshot.data;
-                return SeekBar(
-                  duration: positionData?.duration ?? Duration.zero,
-                  position: positionData?.position ?? Duration.zero,
-                  bufferedPosition:
-                  positionData?.bufferedPosition ?? Duration.zero,
-                  onChangeEnd: _player.seek,
-                );
-              },
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            color: Colors.black12,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ControlButtons(_player),
+                StreamBuilder<PositionData>(
+                  stream: _positionDataStream,
+                  builder: (context, snapshot) {
+                    final positionData = snapshot.data;
+                    return SeekBar(
+                      duration: positionData?.duration ?? Duration.zero,
+                      position: positionData?.position ?? Duration.zero,
+                      bufferedPosition:
+                          positionData?.bufferedPosition ?? Duration.zero,
+                      onChangeEnd: _player.seek,
+                    );
+                  },
+                ),
+              ],
             ),
-
-          ],
-        ),
-      );
+          ),
+          IconButton(
+              icon: Icon(Icons.share),
+              onPressed: () {
+                Share.shareFiles([widget.record],
+                    text: _getNameFromFilePath(filePath: widget.record));
+              }),
+          IconButton(
+              icon: Icon(Icons.delete_forever),
+              onPressed: () async {
+                final dir = Directory(widget.record);
+                await dir.delete(recursive: true);
+                Navigator.of(context).pop();
+              }),
+        ],
+      ),
+    );
   }
 }
 
+String _getNameFromFilePath({required String filePath}) {
+  String fromEpoch = filePath.substring(
+      filePath.lastIndexOf('/') + 1, filePath.lastIndexOf('.'));
+
+  DateTime recordedDate =
+      DateTime.fromMillisecondsSinceEpoch(int.parse(fromEpoch));
+  int year = recordedDate.year;
+  int month = recordedDate.month;
+  int day = recordedDate.day;
+  int hour = recordedDate.hour;
+  int minute = recordedDate.minute;
+  int second = recordedDate.second;
+
+  return ('Recording $year:$month:$day-$hour:$minute:$second');
+}
 
 class ControlButtons extends StatelessWidget {
   final AudioPlayer player;
@@ -117,7 +155,6 @@ class ControlButtons extends StatelessWidget {
             );
           },
         ),
-
         StreamBuilder<PlayerState>(
           stream: player.playerStateStream,
           builder: (context, snapshot) {
