@@ -19,7 +19,7 @@ class TimerWidget extends StatefulWidget {
 }
 
 class _TimerWidgetState extends State<TimerWidget> {
-  Duration duration = Duration();
+  Duration duration = const Duration();
   Timer? timer;
 
   @override
@@ -36,7 +36,7 @@ class _TimerWidgetState extends State<TimerWidget> {
   }
 
   void reset() => setState(() {
-        duration = Duration();
+        duration = const Duration();
       });
 
   void addTime() {
@@ -77,7 +77,7 @@ class _TimerWidgetState extends State<TimerWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(timeFormat(duration),style: TextStyle(fontSize: 26,fontWeight: FontWeight.bold),),
+        Text(timeFormat(duration),style: const TextStyle(fontSize: 26,fontWeight: FontWeight.bold),),
 
         Text(widget.controller.value ?"Recording":"Press Start")
       ],

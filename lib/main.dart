@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:voice_recorder/api/sound_recorder.dart';
 import 'package:voice_recorder/services/theme.dart';
 import 'package:voice_recorder/services/theme_services.dart';
@@ -28,7 +25,7 @@ class MyApp extends StatelessWidget {
       theme: Themes.light,
       darkTheme: Themes.dark,
       themeMode: ThemeServices().theme,
-      home:  HomePage(),
+      home: HomePage(),
     );
   }
 }
@@ -44,17 +41,16 @@ class _HomePageState extends State<HomePage> {
   final timerController = TimerController();
   final recorder = SoundRecorder();
 
-
   @override
   void initState() {
     super.initState();
     initilizing();
     recorder.init();
   }
+
   void initilizing() async {
     await GetStorage.init();
   }
-
 
   @override
   void dispose() {
@@ -73,7 +69,6 @@ class _HomePageState extends State<HomePage> {
         leading: GestureDetector(
           onTap: () {
             ThemeServices().switchTheme();
-            print(Get.isDarkMode);
           },
           child: Icon(
             Get.isDarkMode ? Icons.wb_sunny_rounded : Icons.nightlight_round,
@@ -89,11 +84,11 @@ class _HomePageState extends State<HomePage> {
           Flexible(
             flex: 1,
             child: RecordListView(
-              // records: records,
-            ),
+                // records: records,
+                ),
           ),
           Container(
-            color:backgroundColor,
+            color: backgroundColor,
             height: 280,
             child: Column(
               children: [
@@ -107,8 +102,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
-
   Widget recodingWidget() {
     final isRecording = recorder.isRecording;
     final icon = isRecording ? Icons.stop : Icons.mic;
@@ -116,18 +109,18 @@ class _HomePageState extends State<HomePage> {
       width: MediaQuery.of(context).size.width,
       height: 280,
       decoration: BoxDecoration(
-        color: avatorBackgroundColor,
-        border: Border.all(
           color: avatorBackgroundColor,
-        ),
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(40),topRight: Radius.circular(40))
-      ),
+          border: Border.all(
+            color: avatorBackgroundColor,
+          ),
+          borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(40), topRight: Radius.circular(40))),
       child: AvatarGlow(
         glowColor: avatorGrowColor,
         endRadius: 140.0,
-        duration: Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 200),
         animate: recorder.isRecording ? true : false,
-        repeatPauseDuration: Duration(milliseconds: 100),
+        repeatPauseDuration: const Duration(milliseconds: 100),
         child: CircleAvatar(
           radius: 100,
           backgroundColor: avatorGrowColor,
@@ -158,7 +151,7 @@ class _HomePageState extends State<HomePage> {
                   TimerWidget(
                     controller: timerController,
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 8,
                   ),
                 ],

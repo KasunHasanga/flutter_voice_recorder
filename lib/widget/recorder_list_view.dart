@@ -22,8 +22,7 @@ class _RecordListViewState extends State<RecordListView> {
   List<String> records = [];
   late int refresherRecordCount;
   RefreshController _refreshController =
-  RefreshController(initialRefresh: false);
-
+      RefreshController(initialRefresh: false);
 
   @override
   void initState() {
@@ -33,7 +32,7 @@ class _RecordListViewState extends State<RecordListView> {
         if (onData.path.contains('.aac')) records.add(onData.path);
       }).onDone(() {
         records = records.reversed.toList();
-        refresherRecordCount=records.length;
+        refresherRecordCount = records.length;
         setState(() {});
       });
     });
@@ -48,86 +47,89 @@ class _RecordListViewState extends State<RecordListView> {
 
   @override
   Widget build(BuildContext context) {
-return Scaffold(
-  backgroundColor: backgroundColor,
-body: SmartRefresher(
-  enablePullDown: true,
-  enablePullUp: false,
-  header: WaterDropHeader(),
-  // footer: CustomFooter(
-  //   builder: (BuildContext context,LoadStatus mode){
-  //     Widget body ;
-  //     if(mode==LoadStatus.idle){
-  //       body =  Text("pull up load");
-  //     }
-  //     else if(mode==LoadStatus.loading){
-  //       body =  CupertinoActivityIndicator();
-  //     }
-  //     else if(mode == LoadStatus.failed){
-  //       body = Text("Load Failed!Click retry!");
-  //     }
-  //     else if(mode == LoadStatus.canLoading){
-  //       body = Text("release to load more");
-  //     }
-  //     else{
-  //       body = Text("No more Data");
-  //     }
-  //     return Container(
-  //       height: 55.0,
-  //       child: Center(child:body),
-  //     );
-  //   },
-  // ),
-  controller: _refreshController,
-  onRefresh: _onRefresh,
-  onLoading: _onLoading,
-  child: ListView.builder(
-    itemBuilder: (c, i) => Card(
-        child: ListTile(
-          title: Text('New recoding ${records.length - i}',style: titleStyle,),
-          subtitle: Text(getDateFromFilePath(
-              filePath: records.elementAt(i)),style: subTitleStyle,),
-          onTap: () async{
-            bool isDeleted =await Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => SingleRecordingView(
-                      record: records.elementAt(i),
-                      recoderName:
-                      'New recoding ${records.length - i}')),
-            );
-            if(isDeleted!=null  &&isDeleted==true){
-              _onRefresh();
-            }
-          },
-          trailing: Icon(Icons.play_arrow_outlined),
-        )),
-    itemExtent: 100.0,
-    itemCount: records.length,
-  ),
-)
-);
+    return Scaffold(
+        backgroundColor: backgroundColor,
+        body: SmartRefresher(
+          enablePullDown: true,
+          enablePullUp: false,
+          header: const WaterDropHeader(),
+          // footer: CustomFooter(
+          //   builder: (BuildContext context,LoadStatus mode){
+          //     Widget body ;
+          //     if(mode==LoadStatus.idle){
+          //       body =  Text("pull up load");
+          //     }
+          //     else if(mode==LoadStatus.loading){
+          //       body =  CupertinoActivityIndicator();
+          //     }
+          //     else if(mode == LoadStatus.failed){
+          //       body = Text("Load Failed!Click retry!");
+          //     }
+          //     else if(mode == LoadStatus.canLoading){
+          //       body = Text("release to load more");
+          //     }
+          //     else{
+          //       body = Text("No more Data");
+          //     }
+          //     return Container(
+          //       height: 55.0,
+          //       child: Center(child:body),
+          //     );
+          //   },
+          // ),
+          controller: _refreshController,
+          onRefresh: _onRefresh,
+          onLoading: _onLoading,
+          child: ListView.builder(
+            itemBuilder: (c, i) => Card(
+                child: ListTile(
+              title: Text(
+                'New recoding ${records.length - i}',
+                style: titleStyle,
+              ),
+              subtitle: Text(
+                getDateFromFilePath(filePath: records.elementAt(i)),
+                style: subTitleStyle,
+              ),
+              onTap: () async {
+                bool isDeleted = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => SingleRecordingView(
+                          record: records.elementAt(i),
+                          recoderName: 'New recoding ${records.length - i}')),
+                );
+                if (isDeleted == true) {
+                  _onRefresh();
+                }
+              },
+              trailing: const Icon(Icons.play_arrow_outlined),
+            )),
+            itemExtent: 100.0,
+            itemCount: records.length,
+          ),
+        ));
   }
-  void _onRefresh() async{
+
+  void _onRefresh() async {
     // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 1000));
+    await Future.delayed(const Duration(milliseconds: 1000));
     _onRecordComplete();
     // if failed,use refreshFailed()
     _refreshController.refreshCompleted();
   }
-  void _onLoading() async{
+
+  void _onLoading() async {
     // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 1000));
+    await Future.delayed(const Duration(milliseconds: 1000));
     // if failed,use loadFailed(),if no data return,use LoadNodata()
-    if(refresherRecordCount<records.length){
+    if (refresherRecordCount < records.length) {
       refresherRecordCount++;
-      records.add((records.length+1).toString());
-      if(mounted)
-        setState(() {
-
-        });
+      records.add((records.length + 1).toString());
+      if (mounted) {
+        setState(() {});
+      }
     }
-
 
     _refreshController.loadComplete();
   }
@@ -139,11 +141,11 @@ body: SmartRefresher(
     }).onDone(() {
       records.sort();
       records = records.reversed.toList();
-      refresherRecordCount=records.length;
+      refresherRecordCount = records.length;
       setState(() {});
     });
   }
-  
+
   String getDateFromFilePath({required String filePath}) {
     String fromEpoch = filePath.substring(
         filePath.lastIndexOf('/') + 1, filePath.lastIndexOf('.'));
@@ -160,5 +162,4 @@ body: SmartRefresher(
 
     return ('$year-$month-$day');
   }
-
 }

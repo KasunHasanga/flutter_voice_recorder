@@ -69,7 +69,7 @@ class _SingleRecordingViewState extends State<SingleRecordingView>
         title: Text(widget.recoderName),
          elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: (){
             Navigator.pop(context,false);
           },
