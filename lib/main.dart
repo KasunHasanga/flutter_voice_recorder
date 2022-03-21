@@ -43,22 +43,12 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final timerController = TimerController();
   final recorder = SoundRecorder();
-  late Directory appDirectory;
-  List<String> records = [];
+
 
   @override
   void initState() {
     super.initState();
     initilizing();
-    getApplicationDocumentsDirectory().then((value) {
-      appDirectory = value;
-      appDirectory.list().listen((onData) {
-        if (onData.path.contains('.aac')) records.add(onData.path);
-      }).onDone(() {
-        records = records.reversed.toList();
-        setState(() {});
-      });
-    });
     recorder.init();
   }
   void initilizing() async {
@@ -69,7 +59,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     recorder.dispose();
-    appDirectory.delete();
     super.dispose();
   }
 
@@ -100,7 +89,7 @@ class _HomePageState extends State<HomePage> {
           Flexible(
             flex: 1,
             child: RecordListView(
-              records: records,
+              // records: records,
             ),
           ),
           SizedBox(
@@ -117,16 +106,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _onRecordComplete() {
-    records.clear();
-    appDirectory.list().listen((onData) {
-      if (onData.path.contains('.aac')) records.add(onData.path);
-    }).onDone(() {
-      records.sort();
-      records = records.reversed.toList();
-      setState(() {});
-    });
-  }
+
 
   Widget recodingWidget() {
     final isRecording = recorder.isRecording;
@@ -161,7 +141,7 @@ class _HomePageState extends State<HomePage> {
                   timerController.startTimer();
                 } else {
                   timerController.stopTimer();
-                  _onRecordComplete();
+                  // _onRecordComplete();
                 }
               });
               // }else{

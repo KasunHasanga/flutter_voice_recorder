@@ -43,6 +43,9 @@ dependencies:
   get_storage:
   get:
   google_fonts: 2.0.0
+  pull_to_refresh: ^2.0.0
+
+
 
 dev_dependencies:
   flutter_test:
