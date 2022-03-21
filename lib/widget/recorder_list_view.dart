@@ -84,7 +84,7 @@ body: SmartRefresher(
     itemBuilder: (c, i) => Card(
         child: ListTile(
           title: Text('New recoding ${records.length - i}',style: titleStyle,),
-          subtitle: Text(_getDateFromFilePatah(
+          subtitle: Text(getDateFromFilePath(
               filePath: records.elementAt(i)),style: subTitleStyle,),
           onTap: () {
             Navigator.push(
@@ -140,7 +140,7 @@ body: SmartRefresher(
     });
   }
   
-  String _getDateFromFilePatah({required String filePath}) {
+  String getDateFromFilePath({required String filePath}) {
     String fromEpoch = filePath.substring(
         filePath.lastIndexOf('/') + 1, filePath.lastIndexOf('.'));
 

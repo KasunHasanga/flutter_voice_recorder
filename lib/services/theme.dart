@@ -25,6 +25,13 @@ class Themes {
 Color get backgroundColor {
   return Get.isDarkMode ?   darkGrayClr:white;
 }
+Color get avatorBackgroundColor {
+  return Get.isDarkMode ?   darkHeaderClr:Color(0xffd4d0c5);
+}
+Color get avatorGrowColor {
+  return Get.isDarkMode ?   white:darkHeaderClr;
+}
+
 
 TextStyle get subHeadingStyle {
   return GoogleFonts.lato(

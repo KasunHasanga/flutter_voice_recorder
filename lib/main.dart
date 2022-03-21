@@ -65,7 +65,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.theme.backgroundColor,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text("Audio Recorder"),
         centerTitle: true,
@@ -115,21 +115,21 @@ class _HomePageState extends State<HomePage> {
       width: MediaQuery.of(context).size.width,
       height: 280,
       decoration: BoxDecoration(
-        color: Colors.grey,
+        color: avatorBackgroundColor,
         border: Border.all(
-          color: Colors.black12,
+          color: avatorBackgroundColor,
         ),
           borderRadius: BorderRadius.only(topLeft: Radius.circular(40),topRight: Radius.circular(40))
       ),
       child: AvatarGlow(
-        glowColor: Colors.white,
+        glowColor: avatorGrowColor,
         endRadius: 140.0,
         duration: Duration(milliseconds: 200),
         animate: recorder.isRecording ? true : false,
         repeatPauseDuration: Duration(milliseconds: 100),
         child: CircleAvatar(
           radius: 100,
-          backgroundColor: Colors.white,
+          backgroundColor: avatorGrowColor,
           child: GestureDetector(
             onTap: () async {
               // bool isPermissionOk=await recorder.checkMicrophonePermission();
