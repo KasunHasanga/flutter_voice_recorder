@@ -110,48 +110,59 @@ class _HomePageState extends State<HomePage> {
   Widget recodingWidget() {
     final isRecording = recorder.isRecording;
     final icon = isRecording ? Icons.stop : Icons.mic;
-    return AvatarGlow(
-      glowColor: Colors.white,
-      endRadius: 140.0,
-      duration: Duration(milliseconds: 200),
-      animate: recorder.isRecording ? true : false,
-      repeatPauseDuration: Duration(milliseconds: 100),
-      child: CircleAvatar(
-        radius: 100,
-        backgroundColor: Colors.white,
-        child: GestureDetector(
-          onTap: () async {
-            // bool isPermissionOk=await recorder.checkMicrophonePermission();
-            // if (isPermissionOk){
-            await recorder.toggleRecording();
-            final isRecording = recorder.isRecording;
-            setState(() {
-              if (isRecording) {
-                timerController.startTimer();
-              } else {
-                timerController.stopTimer();
-                _onRecordComplete();
-              }
-            });
-            // }else{
-            //   print("Something went Wrong");
-            // }
-          },
-          child: CircleAvatar(
-            backgroundColor: Colors.indigo.shade900.withBlue(70),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon),
-                TimerWidget(
-                  controller: timerController,
-                ),
-                SizedBox(
-                  height: 8,
-                ),
-              ],
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 280,
+      decoration: BoxDecoration(
+        color: Colors.grey,
+        border: Border.all(
+          color: Colors.black12,
+        ),
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(40),topRight: Radius.circular(40))
+      ),
+      child: AvatarGlow(
+        glowColor: Colors.white,
+        endRadius: 140.0,
+        duration: Duration(milliseconds: 200),
+        animate: recorder.isRecording ? true : false,
+        repeatPauseDuration: Duration(milliseconds: 100),
+        child: CircleAvatar(
+          radius: 100,
+          backgroundColor: Colors.white,
+          child: GestureDetector(
+            onTap: () async {
+              // bool isPermissionOk=await recorder.checkMicrophonePermission();
+              // if (isPermissionOk){
+              await recorder.toggleRecording();
+              final isRecording = recorder.isRecording;
+              setState(() {
+                if (isRecording) {
+                  timerController.startTimer();
+                } else {
+                  timerController.stopTimer();
+                  _onRecordComplete();
+                }
+              });
+              // }else{
+              //   print("Something went Wrong");
+              // }
+            },
+            child: CircleAvatar(
+              backgroundColor: Colors.indigo.shade900.withBlue(70),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon),
+                  TimerWidget(
+                    controller: timerController,
+                  ),
+                  SizedBox(
+                    height: 8,
+                  ),
+                ],
+              ),
+              radius: 92.0,
             ),
-            radius: 92.0,
           ),
         ),
       ),
