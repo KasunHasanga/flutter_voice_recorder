@@ -49,9 +49,10 @@ class _RecordListViewState extends State<RecordListView> {
   @override
   Widget build(BuildContext context) {
 return Scaffold(
+  backgroundColor: backgroundColor,
 body: SmartRefresher(
   enablePullDown: true,
-  enablePullUp: true,
+  enablePullUp: false,
   header: WaterDropHeader(),
   // footer: CustomFooter(
   //   builder: (BuildContext context,LoadStatus mode){
@@ -86,8 +87,8 @@ body: SmartRefresher(
           title: Text('New recoding ${records.length - i}',style: titleStyle,),
           subtitle: Text(getDateFromFilePath(
               filePath: records.elementAt(i)),style: subTitleStyle,),
-          onTap: () {
-            Navigator.push(
+          onTap: () async{
+            bool isDeleted =await Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) => SingleRecordingView(
@@ -95,6 +96,9 @@ body: SmartRefresher(
                       recoderName:
                       'New recoding ${records.length - i}')),
             );
+            if(isDeleted!=null  &&isDeleted==true){
+              _onRefresh();
+            }
           },
           trailing: Icon(Icons.play_arrow_outlined),
         )),

@@ -92,7 +92,8 @@ class _HomePageState extends State<HomePage> {
               // records: records,
             ),
           ),
-          SizedBox(
+          Container(
+            color:backgroundColor,
             height: 280,
             child: Column(
               children: [

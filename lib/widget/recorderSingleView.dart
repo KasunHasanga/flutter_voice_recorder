@@ -68,6 +68,12 @@ class _SingleRecordingViewState extends State<SingleRecordingView>
       appBar: AppBar(
         title: Text(widget.recoderName),
          elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: (){
+            Navigator.pop(context,false);
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.only(left: 10,right: 10),
@@ -130,7 +136,8 @@ class _SingleRecordingViewState extends State<SingleRecordingView>
                     onPressed: () async {
                       final dir = Directory(widget.record);
                       await dir.delete(recursive: true);
-                      Navigator.of(context).pop();
+                      // Navigator.of(context).pop();
+                      Navigator.pop(context,true);
                     }),
               ],
             ),
