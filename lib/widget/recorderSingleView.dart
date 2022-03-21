@@ -1,13 +1,12 @@
 import 'dart:io';
-
-import 'package:share_plus/share_plus.dart';
-import 'package:voice_recorder/main.dart';
-
+import 'package:share_plus/share_plus.dart' show Share;
+import 'package:voice_recorder/services/theme.dart';
 import 'common.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
+// import 'package:get/get.dart';
 
 class SingleRecordingView extends StatefulWidget {
   final String record;
@@ -32,7 +31,7 @@ class _SingleRecordingViewState extends State<SingleRecordingView>
 
   Future<void> _init() async {
     final session = await AudioSession.instance;
-    await session.configure(AudioSessionConfiguration.speech());
+    await session.configure(const AudioSessionConfiguration.speech());
     try {
       await _player.setFilePath(widget.record);
     } catch (e) {
@@ -65,50 +64,78 @@ class _SingleRecordingViewState extends State<SingleRecordingView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: Text(widget.recoderName),
+         elevation: 0,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            color: Colors.black12,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
+      body: Padding(
+        padding: const EdgeInsets.only(left: 10,right: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ControlButtons(_player),
-                StreamBuilder<PositionData>(
-                  stream: _positionDataStream,
-                  builder: (context, snapshot) {
-                    final positionData = snapshot.data;
-                    return SeekBar(
-                      duration: positionData?.duration ?? Duration.zero,
-                      position: positionData?.position ?? Duration.zero,
-                      bufferedPosition:
-                          positionData?.bufferedPosition ?? Duration.zero,
-                      onChangeEnd: _player.seek,
-                    );
-                  },
-                ),
+                Text('Time of Recording',style: titleStyle,),
+                Text(_getNameFromFilePath(filePath: widget.record),style: titleStyle,),
               ],
             ),
-          ),
-          IconButton(
-              icon: Icon(Icons.share),
-              onPressed: () {
-                Share.shareFiles([widget.record],
-                    text: _getNameFromFilePath(filePath: widget.record));
-              }),
-          IconButton(
-              icon: Icon(Icons.delete_forever),
-              onPressed: () async {
-                final dir = Directory(widget.record);
-                await dir.delete(recursive: true);
-                Navigator.of(context).pop();
-              }),
-        ],
+            const SizedBox(height: 30,),
+            Container(
+              padding: const EdgeInsets.only(bottom: 10),
+              color: Colors.black12,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+
+                  ControlButtons(_player),
+                  StreamBuilder<PositionData>(
+                    stream: _positionDataStream,
+                    builder: (context, snapshot) {
+                      final positionData = snapshot.data;
+                      return SeekBar(
+                        duration: positionData?.duration ?? Duration.zero,
+                        position: positionData?.position ?? Duration.zero,
+                        bufferedPosition:
+                            positionData?.bufferedPosition ?? Duration.zero,
+                        onChangeEnd: _player.seek,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+
+                Text("Share Recording",style: titleStyle,),
+                IconButton(
+                    icon: const Icon(Icons.share),
+                    onPressed: () {
+                      Share.shareFiles([widget.record],
+                          text: "Recording" +_getNameFromFilePath(filePath: widget.record),);
+                    }),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                 Text("Delete Recording",style: titleStyle,),
+                IconButton(
+                    icon: const Icon(Icons.delete_forever),
+                    onPressed: () async {
+                      final dir = Directory(widget.record);
+                      await dir.delete(recursive: true);
+                      Navigator.of(context).pop();
+                    }),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -127,13 +154,13 @@ String _getNameFromFilePath({required String filePath}) {
   int minute = recordedDate.minute;
   int second = recordedDate.second;
 
-  return ('Recording $year:$month:$day-$hour:$minute:$second');
+  return ('$year:$month:$day-$hour:$minute:$second');
 }
 
 class ControlButtons extends StatelessWidget {
   final AudioPlayer player;
 
-  ControlButtons(this.player);
+  const ControlButtons(this.player, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +168,7 @@ class ControlButtons extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          icon: Icon(Icons.volume_up),
+          icon: const Icon(Icons.volume_up),
           onPressed: () {
             showSliderDialog(
               context: context,
@@ -164,26 +191,26 @@ class ControlButtons extends StatelessWidget {
             if (processingState == ProcessingState.loading ||
                 processingState == ProcessingState.buffering) {
               return Container(
-                margin: EdgeInsets.all(8.0),
+                margin: const EdgeInsets.all(8.0),
                 width: 64.0,
                 height: 64.0,
-                child: CircularProgressIndicator(),
+                child: const CircularProgressIndicator(),
               );
             } else if (playing != true) {
               return IconButton(
-                icon: Icon(Icons.play_arrow),
+                icon: const Icon(Icons.play_arrow),
                 iconSize: 64.0,
                 onPressed: player.play,
               );
             } else if (processingState != ProcessingState.completed) {
               return IconButton(
-                icon: Icon(Icons.pause),
+                icon: const Icon(Icons.pause),
                 iconSize: 64.0,
                 onPressed: player.pause,
               );
             } else {
               return IconButton(
-                icon: Icon(Icons.replay),
+                icon: const Icon(Icons.replay),
                 iconSize: 64.0,
                 onPressed: () => player.seek(Duration.zero),
               );
@@ -194,7 +221,7 @@ class ControlButtons extends StatelessWidget {
           stream: player.speedStream,
           builder: (context, snapshot) => IconButton(
             icon: Text("${snapshot.data?.toStringAsFixed(1)}x",
-                style: TextStyle(fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             onPressed: () {
               showSliderDialog(
                 context: context,

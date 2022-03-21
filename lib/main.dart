@@ -2,12 +2,17 @@ import 'dart:io';
 
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:voice_recorder/api/sound_recorder.dart';
+import 'package:voice_recorder/services/theme.dart';
+import 'package:voice_recorder/services/theme_services.dart';
 import 'package:voice_recorder/widget/recorder_list_view.dart';
 import 'package:voice_recorder/widget/timer_widget.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -17,13 +22,13 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Audio Recorder',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const HomePage(),
       debugShowCheckedModeBanner: false,
+      theme: Themes.light,
+      darkTheme: Themes.dark,
+      themeMode: ThemeServices().theme,
+      home:  HomePage(),
     );
   }
 }
@@ -44,6 +49,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    initilizing();
     getApplicationDocumentsDirectory().then((value) {
       appDirectory = value;
       appDirectory.list().listen((onData) {
@@ -55,6 +61,10 @@ class _HomePageState extends State<HomePage> {
     });
     recorder.init();
   }
+  void initilizing() async {
+    await GetStorage.init();
+  }
+
 
   @override
   void dispose() {
@@ -66,11 +76,22 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.yellow,
+      backgroundColor: context.theme.backgroundColor,
       appBar: AppBar(
         title: const Text("Audio Recorder"),
         centerTitle: true,
         elevation: 0,
+        leading: GestureDetector(
+          onTap: () {
+            ThemeServices().switchTheme();
+            print(Get.isDarkMode);
+          },
+          child: Icon(
+            Get.isDarkMode ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+            size: 20,
+            color: Get.isDarkMode ? Colors.white : Colors.black,
+          ),
+        ),
       ),
       body: Column(
         // crossAxisAlignment: CrossAxisAlignment.center,

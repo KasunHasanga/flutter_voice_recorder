@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:voice_recorder/services/theme.dart';
 import 'package:voice_recorder/widget/recorderSingleView.dart';
 
 class RecordListView extends StatefulWidget {
@@ -23,9 +24,9 @@ class _RecordListViewState extends State<RecordListView> {
             reverse: true,
             itemBuilder: (BuildContext context, int i) {
               return ListTile(
-                title: Text('New recoding ${widget.records.length - i}'),
+                title: Text('New recoding ${widget.records.length - i}',style: titleStyle,),
                 subtitle: Text(_getDateFromFilePatah(
-                    filePath: widget.records.elementAt(i))),
+                    filePath: widget.records.elementAt(i)),style: subTitleStyle,),
                 onTap: () {
                   Navigator.push(
                     context,
