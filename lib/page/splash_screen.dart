@@ -30,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
     isPermissionOk = await recorder.checkMicrophonePermission();
     if (isPermissionOk) {
       Timer(
-          Duration(seconds: 3),
+          const Duration(seconds: 3),
           () => Navigator.of(context).pushReplacement(MaterialPageRoute(
               builder: (BuildContext context) => HomePage())));
     } else {
@@ -61,6 +61,9 @@ class _SplashScreenState extends State<SplashScreen> {
             isOpenAppSettingRequired
                 ? GestureDetector(
                     onTap: () async {
+                      setState(() {
+                        isOpenAppSettingRequired=false;
+                      });
                       await AppSettings.openAppSettings();
                       initilizing();
                     },
