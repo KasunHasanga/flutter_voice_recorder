@@ -269,10 +269,7 @@ class _HomePageState extends State<HomePage> {
                   timerController.startTimer();
                 } else {
                   timerController.stopTimer();
-
-                  ///todo trigger smartRefresher reload function
                   _onRefresh();
-                  // _onRecordComplete();
                 }
               });
               // }else{
