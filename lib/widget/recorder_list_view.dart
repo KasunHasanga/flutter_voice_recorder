@@ -1,14 +1,16 @@
 import 'dart:io';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:voice_recorder/services/theme.dart';
+import 'package:voice_recorder/widget/recorderSingleView.dart';
 
 class RecordListView extends StatefulWidget {
-  final List<String> records;
+  // final List<String> records;
   const RecordListView({
     Key? key,
-    required this.records,
+    // required this.records,
   }) : super(key: key);
 
   @override
@@ -16,142 +18,148 @@ class RecordListView extends StatefulWidget {
 }
 
 class _RecordListViewState extends State<RecordListView> {
-  late int _totalDuration;
-  late int _currentDuration;
-  double _completedPercentage = 0.0;
-  bool _isPlaying = false;
-  int _selectedIndex = -1;
+  late Directory appDirectory;
+  List<String> records = [];
+  late int refresherRecordCount;
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+
+  @override
+  void initState() {
+    getApplicationDocumentsDirectory().then((value) {
+      appDirectory = value;
+      appDirectory.list().listen((onData) {
+        if (onData.path.contains('.aac')) records.add(onData.path);
+      }).onDone(() {
+        records = records.reversed.toList();
+        refresherRecordCount = records.length;
+        setState(() {});
+      });
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    appDirectory.delete();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return widget.records.isEmpty
-        ? Center(child: Text('No records yet '))
-        : ListView.builder(
-      itemCount: widget.records.length,
-      shrinkWrap: true,
-      reverse: true,
-      itemBuilder: (BuildContext context, int i) {
-        return ExpansionTile(
-          title: Text('New recoding ${widget.records.length - i}'),
-          subtitle: Text(_getDateFromFilePatah(
-              filePath: widget.records.elementAt(i))),
-          onExpansionChanged: ((newState) {
-            if (newState) {
-              setState(() {
-                _selectedIndex = i;
-              });
-            }
-          }),
-          children: [
-            Container(
-              height: 125,
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  LinearProgressIndicator(
-                    minHeight: 5,
-                    backgroundColor: Colors.black,
-                    valueColor:
-                    AlwaysStoppedAnimation<Color>(Colors.green),
-                    value: _selectedIndex == i ? _completedPercentage : 0,
-                  ),
-                  IconButton(
-                    icon: _selectedIndex == i
-                        ? _isPlaying
-                        ? Icon(Icons.pause)
-                        : Icon(Icons.play_arrow)
-                        : Icon(Icons.play_arrow),
-                    onPressed: () => _onPlay(
-                        filePath: widget.records.elementAt(i), index: i),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.share),
-                        onPressed: () {
-                          print(widget.records.elementAt(i));
-                          Share.shareFiles([widget.records.elementAt(i)], text: _getNameFromFilePath(filePath:widget.records.elementAt(i)));
-                        }
-                      ),
-                      IconButton(
-                          icon: Icon(Icons.delete_forever),
-                          onPressed: () async{
-                            final dir =Directory(widget.records.elementAt(i));
-                            await dir.delete(recursive: true);
-
-                          }
-                      ),
-                    ],
-                  ),
-                ],
+    return Scaffold(
+        backgroundColor: backgroundColor,
+        body: SmartRefresher(
+          enablePullDown: true,
+          enablePullUp: false,
+          header: const WaterDropHeader(),
+          // footer: CustomFooter(
+          //   builder: (BuildContext context,LoadStatus mode){
+          //     Widget body ;
+          //     if(mode==LoadStatus.idle){
+          //       body =  Text("pull up load");
+          //     }
+          //     else if(mode==LoadStatus.loading){
+          //       body =  CupertinoActivityIndicator();
+          //     }
+          //     else if(mode == LoadStatus.failed){
+          //       body = Text("Load Failed!Click retry!");
+          //     }
+          //     else if(mode == LoadStatus.canLoading){
+          //       body = Text("release to load more");
+          //     }
+          //     else{
+          //       body = Text("No more Data");
+          //     }
+          //     return Container(
+          //       height: 55.0,
+          //       child: Center(child:body),
+          //     );
+          //   },
+          // ),
+          controller: _refreshController,
+          onRefresh: _onRefresh,
+          onLoading: _onLoading,
+          child: ListView.builder(
+            itemBuilder: (c, i) => Card(
+                child: ListTile(
+              title: Text(
+                'New recoding ${records.length - i}',
+                style: titleStyle,
               ),
-            ),
-          ],
-        );
-      },
-    );
+              subtitle: Text(
+                getDateFromFilePath(filePath: records.elementAt(i)),
+                style: subTitleStyle,
+              ),
+              onTap: () async {
+                bool isDeleted = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => SingleRecordingView(
+                          record: records.elementAt(i),
+                          recoderName: 'New recoding ${records.length - i}')),
+                );
+                if (isDeleted == true) {
+                  _onRefresh();
+                }
+              },
+              trailing: const Icon(Icons.play_arrow_outlined),
+            )),
+            itemExtent: 100.0,
+            itemCount: records.length,
+          ),
+        ));
   }
 
-  Future<void> _onPlay({required String filePath, required int index}) async {
-    AudioPlayer audioPlayer = AudioPlayer();
+  void _onRefresh() async {
+    // monitor network fetch
+    await Future.delayed(const Duration(milliseconds: 1000));
+    _onRecordComplete();
+    // if failed,use refreshFailed()
+    _refreshController.refreshCompleted();
+  }
 
-    if (!_isPlaying) {
-      audioPlayer.play(filePath, isLocal: true);
-      setState(() {
-        _selectedIndex = index;
-        _completedPercentage = 0.0;
-        _isPlaying = true;
-      });
-
-      audioPlayer.onPlayerCompletion.listen((_) {
-        setState(() {
-          _isPlaying = false;
-          _completedPercentage = 0.0;
-        });
-      });
-      audioPlayer.onDurationChanged.listen((duration) {
-        setState(() {
-          _totalDuration = duration.inMicroseconds;
-        });
-      });
-
-      audioPlayer.onAudioPositionChanged.listen((duration) {
-        setState(() {
-          _currentDuration = duration.inMicroseconds;
-          _completedPercentage =
-              _currentDuration.toDouble() / _totalDuration.toDouble();
-        });
-      });
+  void _onLoading() async {
+    // monitor network fetch
+    await Future.delayed(const Duration(milliseconds: 1000));
+    // if failed,use loadFailed(),if no data return,use LoadNodata()
+    if (refresherRecordCount < records.length) {
+      refresherRecordCount++;
+      records.add((records.length + 1).toString());
+      if (mounted) {
+        setState(() {});
+      }
     }
+
+    _refreshController.loadComplete();
   }
 
-  String _getDateFromFilePatah({required String filePath}) {
+  _onRecordComplete() {
+    records.clear();
+    appDirectory.list().listen((onData) {
+      if (onData.path.contains('.aac')) records.add(onData.path);
+    }).onDone(() {
+      records.sort();
+      records = records.reversed.toList();
+      refresherRecordCount = records.length;
+      setState(() {});
+    });
+  }
+
+  String getDateFromFilePath({required String filePath}) {
     String fromEpoch = filePath.substring(
         filePath.lastIndexOf('/') + 1, filePath.lastIndexOf('.'));
 
     DateTime recordedDate =
-    DateTime.fromMillisecondsSinceEpoch(int.parse(fromEpoch));
+        DateTime.fromMillisecondsSinceEpoch(int.parse(fromEpoch));
     int year = recordedDate.year;
-    int month = recordedDate.month;
-    int day = recordedDate.day;
+    String month = recordedDate.month.toString().length == 1
+        ? '0${recordedDate.month}'
+        : recordedDate.month.toString();
+    String day = recordedDate.day.toString().length == 1
+        ? '0${recordedDate.day}'
+        : recordedDate.day.toString();
 
     return ('$year-$month-$day');
-  }
-  String _getNameFromFilePath({required String filePath}) {
-    String fromEpoch = filePath.substring(
-        filePath.lastIndexOf('/') + 1, filePath.lastIndexOf('.'));
-
-    DateTime recordedDate =
-    DateTime.fromMillisecondsSinceEpoch(int.parse(fromEpoch));
-    int year = recordedDate.year;
-    int month = recordedDate.month;
-    int day = recordedDate.day;
-    int hour = recordedDate.hour;
-    int minute = recordedDate.minute;
-    int second =recordedDate.second;
-
-    return ('Recording $year:$month:$day-$hour:$minute:$second');
   }
 }
