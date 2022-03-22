@@ -139,7 +139,7 @@ class _HomePageState extends State<HomePage> {
                 controller: _refreshController,
                 onRefresh: _onRefresh,
                 onLoading: _onLoading,
-                child: ListView.builder(
+                child: (records.isNotEmpty)?ListView.builder(
                   itemBuilder: (c, i) => Card(
                       child: ListTile(
                     title: Text(
@@ -167,7 +167,24 @@ class _HomePageState extends State<HomePage> {
                   )),
                   itemExtent: 100.0,
                   itemCount: records.length,
-                ),
+                ):Column(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(top: 20,bottom: 20),
+                      height: 250,
+                      width: MediaQuery.of(context).size.width,
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage(
+                              'images/background.png'),
+                          // fit: BoxFit.fill,
+                        ),
+                        shape: BoxShape.rectangle,
+                      ),
+                    ),
+                    Text("No Recording Available!!!\n Let\'s Start...",textAlign: TextAlign.center,style: titleStyle,)
+                  ],
+                )
               )),
           Container(
             color: backgroundColor,
@@ -260,8 +277,6 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: avatorGrowColor,
           child: GestureDetector(
             onTap: () async {
-              // bool isPermissionOk=await recorder.checkMicrophonePermission();
-              // if (isPermissionOk){
               await recorder.toggleRecording();
               final isRecording = recorder.isRecording;
               setState(() {
@@ -272,9 +287,6 @@ class _HomePageState extends State<HomePage> {
                   _onRefresh();
                 }
               });
-              // }else{
-              //   print("Something went Wrong");
-              // }
             },
             child: CircleAvatar(
               backgroundColor: Colors.indigo.shade900.withBlue(70),
