@@ -1,11 +1,15 @@
+import 'dart:io';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:voice_recorder/api/sound_recorder.dart';
+import 'package:voice_recorder/page/splash_screen.dart';
 import 'package:voice_recorder/services/theme.dart';
 import 'package:voice_recorder/services/theme_services.dart';
-import 'package:voice_recorder/widget/recorder_list_view.dart';
+import 'package:voice_recorder/widget/recorderSingleView.dart';
 import 'package:voice_recorder/widget/timer_widget.dart';
 
 void main() {
@@ -15,8 +19,6 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
@@ -25,7 +27,8 @@ class MyApp extends StatelessWidget {
       theme: Themes.light,
       darkTheme: Themes.dark,
       themeMode: ThemeServices().theme,
-      home: HomePage(),
+      // home: HomePage(),
+      home: SplashScreen(),
     );
   }
 }
@@ -40,6 +43,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final timerController = TimerController();
   final recorder = SoundRecorder();
+  late Directory appDirectory;
+  List<String> records = [];
+  late int refresherRecordCount;
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
 
   @override
   void initState() {
@@ -49,12 +57,23 @@ class _HomePageState extends State<HomePage> {
   }
 
   void initilizing() async {
+    getApplicationDocumentsDirectory().then((value) {
+      appDirectory = value;
+      appDirectory.list().listen((onData) {
+        if (onData.path.contains('.aac')) records.add(onData.path);
+      }).onDone(() {
+        records = records.reversed.toList();
+        refresherRecordCount = records.length;
+        setState(() {});
+      });
+    });
     await GetStorage.init();
   }
 
   @override
   void dispose() {
     recorder.dispose();
+    appDirectory.delete();
     super.dispose();
   }
 
@@ -81,12 +100,92 @@ class _HomePageState extends State<HomePage> {
         // crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // Flexible(
+          //   flex: 1,
+          //   child: RecordListView(
+          //       // records: records,
+          //       ),
+          // ),
           Flexible(
-            flex: 1,
-            child: RecordListView(
-                // records: records,
-                ),
-          ),
+              flex: 1,
+              child: SmartRefresher(
+                enablePullDown: true,
+                enablePullUp: false,
+                header: const WaterDropHeader(),
+                // footer: CustomFooter(
+                //   builder: (BuildContext context,LoadStatus mode){
+                //     Widget body ;
+                //     if(mode==LoadStatus.idle){
+                //       body =  Text("pull up load");
+                //     }
+                //     else if(mode==LoadStatus.loading){
+                //       body =  CupertinoActivityIndicator();
+                //     }
+                //     else if(mode == LoadStatus.failed){
+                //       body = Text("Load Failed!Click retry!");
+                //     }
+                //     else if(mode == LoadStatus.canLoading){
+                //       body = Text("release to load more");
+                //     }
+                //     else{
+                //       body = Text("No more Data");
+                //     }
+                //     return Container(
+                //       height: 55.0,
+                //       child: Center(child:body),
+                //     );
+                //   },
+                // ),
+                controller: _refreshController,
+                onRefresh: _onRefresh,
+                onLoading: _onLoading,
+                child: (records.isNotEmpty)?ListView.builder(
+                  itemBuilder: (c, i) => Card(
+                      child: ListTile(
+                    title: Text(
+                      'New recoding ${records.length - i}',
+                      style: titleStyle,
+                    ),
+                    subtitle: Text(
+                      getDateFromFilePath(filePath: records.elementAt(i)),
+                      style: subTitleStyle,
+                    ),
+                    onTap: () async {
+                      bool isDeleted = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => SingleRecordingView(
+                                record: records.elementAt(i),
+                                recoderName:
+                                    'New recoding ${records.length - i}')),
+                      );
+                      if (isDeleted == true) {
+                        _onRefresh();
+                      }
+                    },
+                    trailing: const Icon(Icons.play_arrow_outlined),
+                  )),
+                  itemExtent: 100.0,
+                  itemCount: records.length,
+                ):Column(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(top: 20,bottom: 20),
+                      height: 250,
+                      width: MediaQuery.of(context).size.width,
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage(
+                              'images/background.png'),
+                          // fit: BoxFit.fill,
+                        ),
+                        shape: BoxShape.rectangle,
+                      ),
+                    ),
+                    Text("No Recording Available!!!\n Let\'s Start...",textAlign: TextAlign.center,style: titleStyle,)
+                  ],
+                )
+              )),
           Container(
             color: backgroundColor,
             height: 280,
@@ -100,6 +199,58 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  void _onRefresh() async {
+    // monitor network fetch
+    await Future.delayed(const Duration(milliseconds: 1000));
+    _onRecordComplete();
+    // if failed,use refreshFailed()
+    _refreshController.refreshCompleted();
+  }
+
+  void _onLoading() async {
+    // monitor network fetch
+    await Future.delayed(const Duration(milliseconds: 1000));
+    // if failed,use loadFailed(),if no data return,use LoadNodata()
+    if (refresherRecordCount < records.length) {
+      refresherRecordCount++;
+      records.add((records.length + 1).toString());
+      if (mounted) {
+        setState(() {});
+      }
+    }
+
+    _refreshController.loadComplete();
+  }
+
+  _onRecordComplete() {
+    records.clear();
+    appDirectory.list().listen((onData) {
+      if (onData.path.contains('.aac')) records.add(onData.path);
+    }).onDone(() {
+      records.sort();
+      records = records.reversed.toList();
+      refresherRecordCount = records.length;
+      setState(() {});
+    });
+  }
+
+  String getDateFromFilePath({required String filePath}) {
+    String fromEpoch = filePath.substring(
+        filePath.lastIndexOf('/') + 1, filePath.lastIndexOf('.'));
+
+    DateTime recordedDate =
+        DateTime.fromMillisecondsSinceEpoch(int.parse(fromEpoch));
+    int year = recordedDate.year;
+    String month = recordedDate.month.toString().length == 1
+        ? '0${recordedDate.month}'
+        : recordedDate.month.toString();
+    String day = recordedDate.day.toString().length == 1
+        ? '0${recordedDate.day}'
+        : recordedDate.day.toString();
+
+    return ('$year-$month-$day');
   }
 
   Widget recodingWidget() {
@@ -126,8 +277,6 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: avatorGrowColor,
           child: GestureDetector(
             onTap: () async {
-              // bool isPermissionOk=await recorder.checkMicrophonePermission();
-              // if (isPermissionOk){
               await recorder.toggleRecording();
               final isRecording = recorder.isRecording;
               setState(() {
@@ -135,12 +284,9 @@ class _HomePageState extends State<HomePage> {
                   timerController.startTimer();
                 } else {
                   timerController.stopTimer();
-                  // _onRecordComplete();
+                  _onRefresh();
                 }
               });
-              // }else{
-              //   print("Something went Wrong");
-              // }
             },
             child: CircleAvatar(
               backgroundColor: Colors.indigo.shade900.withBlue(70),
