@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:voice_recorder/api/sound_recorder.dart';
+import 'package:voice_recorder/page/splash_screen.dart';
 import 'package:voice_recorder/services/theme.dart';
 import 'package:voice_recorder/services/theme_services.dart';
 import 'package:voice_recorder/widget/recorder_list_view.dart';
@@ -25,7 +26,8 @@ class MyApp extends StatelessWidget {
       theme: Themes.light,
       darkTheme: Themes.dark,
       themeMode: ThemeServices().theme,
-      home: HomePage(),
+      // home: HomePage(),
+      home: SplashScreen(),
     );
   }
 }
@@ -135,6 +137,7 @@ class _HomePageState extends State<HomePage> {
                   timerController.startTimer();
                 } else {
                   timerController.stopTimer();
+                  ///todo trigger smartRefresher reload function
                   // _onRecordComplete();
                 }
               });
