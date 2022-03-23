@@ -81,19 +81,47 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: AppBar(
-        title: const Text("Audio Recorder"),
-        centerTitle: true,
-        elevation: 0,
-        leading: GestureDetector(
-          onTap: () {
-            ThemeServices().switchTheme();
-          },
-          child: Icon(
-            Get.isDarkMode ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-            size: 20,
-            color: Get.isDarkMode ? Colors.white : Colors.black,
+      appBar:PreferredSize(
+        child: Container(
+          padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top
           ),
+          child: Padding(
+            padding: const EdgeInsets.only(
+                left: 30.0,
+                top: 20.0,
+                bottom: 20.0
+            ),
+            child: Row(
+              children: [
+              GestureDetector(
+                  onTap: () {
+                    ThemeServices().switchTheme();
+                  },
+                  child: Icon(
+                    Get.isDarkMode ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                    size: 20,
+                    color: Get.isDarkMode ? Colors.white : Colors.black,
+                  ),
+                ),
+                SizedBox(width: 20,),
+                Text(
+                  'Audio Recorder',
+                  style:titleStyle.copyWith(fontSize: 20),
+                ),
+              ],
+            ),
+          ),
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  colors: linerGradientColors
+              ),
+
+          ),
+        ),
+        preferredSize: Size(
+            MediaQuery.of(context).size.width,
+            150.0
         ),
       ),
       body: Column(

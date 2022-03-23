@@ -23,15 +23,26 @@ class Themes {
 }
 
 Color get backgroundColor {
-  return Get.isDarkMode ?   darkGrayClr:white;
-}
-Color get avatorBackgroundColor {
-  return Get.isDarkMode ?   darkHeaderClr:const Color(0xffd4d0c5);
-}
-Color get avatorGrowColor {
-  return Get.isDarkMode ?   white:darkHeaderClr;
+  return Get.isDarkMode ? darkGrayClr : white;
 }
 
+Color get avatorBackgroundColor {
+  return Get.isDarkMode ? darkHeaderClr : const Color(0xffd4d0c5);
+}
+
+Color get avatorGrowColor {
+  return Get.isDarkMode ? white : darkHeaderClr;
+}
+
+List<Color> get linerGradientColors {
+  return Get.isDarkMode
+      ? [
+          Colors.black,
+          darkGrayClr,
+          Colors.black,
+        ]
+      : [darkHeaderClr, bluishClr];
+}
 
 TextStyle get subHeadingStyle {
   return GoogleFonts.lato(

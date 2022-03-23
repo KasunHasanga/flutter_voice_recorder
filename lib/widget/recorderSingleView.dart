@@ -6,7 +6,6 @@ import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
-// import 'package:get/get.dart';
 
 class SingleRecordingView extends StatefulWidget {
   final String record;
@@ -65,18 +64,43 @@ class _SingleRecordingViewState extends State<SingleRecordingView>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: AppBar(
-        title: Text(widget.recoderName),
-         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: (){
-            Navigator.pop(context,false);
-          },
+      appBar: PreferredSize(
+        child: Container(
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 30.0, top: 20.0, bottom: 20.0),
+            child: Row(
+              children: [
+                GestureDetector(
+                  child: const Icon(Icons.arrow_back),
+                  onTap: () {
+                    Navigator.pop(context, false);
+                  },
+                ),
+                const SizedBox(
+                  width: 20,
+                ),
+                Text(
+                  widget.recoderName,
+                  style: titleStyle.copyWith(fontSize: 20),
+                ),
+              ],
+            ),
+          ),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: linerGradientColors),
+          ),
         ),
+        preferredSize: Size(MediaQuery.of(context).size.width, 150.0),
       ),
+
+      // AppBar(
+      //   title: Text(widget.recoderName),
+      //    elevation: 0,
+      //   leading:
+      // ),
       body: Padding(
-        padding: const EdgeInsets.only(left: 10,right: 10),
+        padding: const EdgeInsets.only(left: 10, right: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -84,11 +108,19 @@ class _SingleRecordingViewState extends State<SingleRecordingView>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Time of Recording',style: titleStyle,),
-                Text(_getNameFromFilePath(filePath: widget.record),style: titleStyle,),
+                Text(
+                  'Time of Recording',
+                  style: titleStyle,
+                ),
+                Text(
+                  _getNameFromFilePath(filePath: widget.record),
+                  style: titleStyle,
+                ),
               ],
             ),
-            const SizedBox(height: 30,),
+            const SizedBox(
+              height: 30,
+            ),
             Container(
               padding: const EdgeInsets.only(bottom: 10),
               color: Colors.black12,
@@ -96,7 +128,6 @@ class _SingleRecordingViewState extends State<SingleRecordingView>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-
                   ControlButtons(_player),
                   StreamBuilder<PositionData>(
                     stream: _positionDataStream,
@@ -117,27 +148,35 @@ class _SingleRecordingViewState extends State<SingleRecordingView>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-
-                Text("Share Recording",style: titleStyle,),
+                Text(
+                  "Share Recording",
+                  style: titleStyle,
+                ),
                 IconButton(
                     icon: const Icon(Icons.share),
                     onPressed: () {
-                      Share.shareFiles([widget.record],
-                          text: "Recording" +_getNameFromFilePath(filePath: widget.record),);
+                      Share.shareFiles(
+                        [widget.record],
+                        text: "Recording" +
+                            _getNameFromFilePath(filePath: widget.record),
+                      );
                     }),
               ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                 Text("Delete Recording",style: titleStyle,),
+                Text(
+                  "Delete Recording",
+                  style: titleStyle,
+                ),
                 IconButton(
                     icon: const Icon(Icons.delete_forever),
                     onPressed: () async {
                       final dir = Directory(widget.record);
                       await dir.delete(recursive: true);
                       // Navigator.of(context).pop();
-                      Navigator.pop(context,true);
+                      Navigator.pop(context, true);
                     }),
               ],
             ),
